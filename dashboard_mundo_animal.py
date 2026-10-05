@@ -19,46 +19,133 @@ CSV_URL = (
 
 st.markdown("""
 <style>
+
+html, body, [data-testid="stAppViewContainer"] {
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+
+[data-testid="stHeader"] {
+    background: #ffffff !important;
+}
+
 .block-container {
-    padding-top: 2.5rem;
+    padding-top: 3.2rem;
     padding-bottom: 2rem;
+    max-width: 1500px;
 }
 
 .main-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    line-height: 1.25;
-    margin-top: 0.8rem;
-    margin-bottom: 0.3rem;
-    white-space: normal;
+    line-height: 1.2;
+    margin-top: 0.6rem;
+    margin-bottom: 0.35rem;
+    color: #111827;
 }
 
 .sub {
-    color: #888;
-    margin-bottom: 1.2rem;
+    color: #6b7280;
+    font-size: 1.15rem;
+    margin-bottom: 1.8rem;
+}
+
+h1, h2, h3 {
+    color: #111827 !important;
+}
+
+h2 {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+}
+
+h3 {
+    font-size: 1.65rem !important;
+    font-weight: 750 !important;
+}
+
+[data-testid="stMetric"] {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    padding: 18px 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+[data-testid="stMetricLabel"] {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #374151 !important;
 }
 
 [data-testid="stMetricValue"] {
-    font-size: 2rem;
+    font-size: 2.3rem !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-size: 1rem !important;
+}
+
+[data-testid="stProgressBar"] > div > div {
+    height: 16px !important;
+    border-radius: 999px !important;
+}
+
+.stSelectbox label {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+
+[data-testid="stDataFrame"] {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+div[data-testid="stMarkdownContainer"] p {
+    font-size: 1.05rem;
+}
+
+hr {
+    border-color: #e5e7eb !important;
 }
 
 @media (max-width: 700px) {
+
     .block-container {
-        padding-top: 2rem;
-        padding-left: .8rem;
-        padding-right: .8rem;
+        padding-top: 2.5rem;
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
     }
 
     .main-title {
-        font-size: 1.5rem;
-        line-height: 1.3;
-        padding-top: .4rem;
+        font-size: 1.8rem;
+    }
+
+    .sub {
+        font-size: 1rem;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 1.35rem;
+        font-size: 1.75rem !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        font-size: 0.95rem !important;
+    }
+
+    h2 {
+        font-size: 1.55rem !important;
+    }
+
+    h3 {
+        font-size: 1.3rem !important;
     }
 }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -193,9 +280,7 @@ preco_ok = (
     df[COL_PRECO].map(norm) == "SIM"
 ).sum()
 
-# Agora considera publicado quando Mercado Livre = SIM
 completos = ml_ok
-
 pendentes = total - completos
 
 
@@ -208,8 +293,7 @@ st.markdown(
 
 st.markdown(
     '<div class="sub">'
-    'Planilha compartilhada • '
-    'dados atualizados automaticamente'
+    'Acompanhamento em tempo real da planilha compartilhada'
     '</div>',
     unsafe_allow_html=True
 )
@@ -218,17 +302,17 @@ st.markdown(
 c1, c2, c3 = st.columns(3)
 
 c1.metric(
-    "📦 Total",
+    "📦 Total de produtos",
     total
 )
 
 c2.metric(
-    "✅ Publicados no ML",
+    "✅ Publicados no Mercado Livre",
     completos
 )
 
 c3.metric(
-    "⏳ Pendentes no ML",
+    "⏳ Pendentes no Mercado Livre",
     pendentes
 )
 
@@ -247,14 +331,14 @@ st.progress(
 
 st.divider()
 
-st.subheader("Andamento por etapa")
+st.subheader("📊 Andamento por etapa")
 
 
 m1, m2 = st.columns(2)
 
 with m1:
     st.metric(
-        "Conferência",
+        "✅ Conferência",
         f"{conferidos}/{total}",
         f"{conferidos/total*100:.1f}%"
         if total
@@ -262,7 +346,7 @@ with m1:
     )
 
     st.metric(
-        "Mercado Livre",
+        "🛒 Mercado Livre",
         f"{ml_ok}/{total}",
         f"{ml_ok/total*100:.1f}%"
         if total
@@ -272,7 +356,7 @@ with m1:
 
 with m2:
     st.metric(
-        "Estoque contado",
+        "📦 Estoque contado",
         f"{estoque_ok}/{total}",
         f"{estoque_ok/total*100:.1f}%"
         if total
@@ -280,7 +364,7 @@ with m2:
     )
 
     st.metric(
-        "Preço Amauri",
+        "💰 Preço Amauri",
         f"{preco_ok}/{total}",
         f"{preco_ok/total*100:.1f}%"
         if total
@@ -312,11 +396,11 @@ st.bar_chart(
 
 st.divider()
 
-st.subheader("O que precisa de atenção")
+st.subheader("⚠️ O que precisa de atenção")
 
 
 opcao = st.selectbox(
-    "Filtro",
+    "Escolha o filtro",
     [
         "Todos os pendentes",
         "Não conferidos",
@@ -382,7 +466,7 @@ pend = df.loc[
 
 
 st.caption(
-    f"{len(pend)} produto(s) neste filtro"
+    f"{len(pend)} produto(s) encontrado(s)"
 )
 
 st.dataframe(
@@ -401,5 +485,6 @@ if st.button("🔄 Atualizar agora"):
 st.caption(
     "Fonte: Google Sheets compartilhado da Mundo Animal"
 )
+   
 
-
+         
