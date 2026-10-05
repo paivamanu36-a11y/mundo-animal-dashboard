@@ -19,15 +19,45 @@ CSV_URL = (
 
 st.markdown("""
 <style>
-.block-container {padding-top: 1rem; padding-bottom: 2rem;}
-.main-title {font-size: 2rem; font-weight: 800; margin-bottom: .15rem;}
-.sub {color:#666; margin-bottom:1rem;}
-[data-testid="stMetricValue"] {font-size: 2rem;}
+.block-container {
+    padding-top: 2.5rem;
+    padding-bottom: 2rem;
+}
+
+.main-title {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-top: 0.8rem;
+    margin-bottom: 0.3rem;
+    white-space: normal;
+}
+
+.sub {
+    color: #888;
+    margin-bottom: 1.2rem;
+}
+
+[data-testid="stMetricValue"] {
+    font-size: 2rem;
+}
 
 @media (max-width: 700px) {
-  .block-container {padding-left: .8rem; padding-right: .8rem;}
-  .main-title {font-size: 1.45rem;}
-  [data-testid="stMetricValue"] {font-size: 1.35rem;}
+    .block-container {
+        padding-top: 2rem;
+        padding-left: .8rem;
+        padding-right: .8rem;
+    }
+
+    .main-title {
+        font-size: 1.5rem;
+        line-height: 1.3;
+        padding-top: .4rem;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.35rem;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -54,7 +84,6 @@ def carregar():
         for c in df.columns
     ]
 
-    # Remove colunas vazias tipo Unnamed / Sem nome
     df = df.loc[
         :,
         ~df.columns.str.match(
@@ -85,7 +114,6 @@ def carregar():
 
     df = df.rename(columns=renomear)
 
-    # Remove linhas vazias
     if "NOME DO PRODUTO" in df.columns:
         df = df[df["NOME DO PRODUTO"].notna()]
         df = df[
@@ -165,9 +193,8 @@ preco_ok = (
     df[COL_PRECO].map(norm) == "SIM"
 ).sum()
 
-completos = (
-    df[COL_STATUS].map(norm) == "100% PUBLICADO"
-).sum()
+# Agora considera publicado quando Mercado Livre = SIM
+completos = ml_ok
 
 pendentes = total - completos
 
@@ -196,12 +223,12 @@ c1.metric(
 )
 
 c2.metric(
-    "✅ 100% publicados",
+    "✅ Publicados no ML",
     completos
 )
 
 c3.metric(
-    "⏳ Pendentes",
+    "⏳ Pendentes no ML",
     pendentes
 )
 
@@ -285,9 +312,7 @@ st.bar_chart(
 
 st.divider()
 
-st.subheader(
-    "O que precisa de atenção"
-)
+st.subheader("O que precisa de atenção")
 
 
 opcao = st.selectbox(
@@ -304,8 +329,8 @@ opcao = st.selectbox(
 
 if opcao == "Todos os pendentes":
     mask = (
-        df[COL_STATUS].map(norm)
-        != "100% PUBLICADO"
+        df[COL_ML].map(norm)
+        != "SIM"
     )
 
 elif opcao == "Não conferidos":
@@ -376,6 +401,5 @@ if st.button("🔄 Atualizar agora"):
 st.caption(
     "Fonte: Google Sheets compartilhado da Mundo Animal"
 )
-
 
 
